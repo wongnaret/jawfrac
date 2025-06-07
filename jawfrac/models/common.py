@@ -1,4 +1,5 @@
-from typing import Any, List, Literal, Optional, Tuple
+from typing import Any, List, Optional, Tuple
+from typing_extensions import Literal
 
 import nibabel
 import numpy as np

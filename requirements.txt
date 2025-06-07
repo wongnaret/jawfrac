@@ -11,3 +11,6 @@ pytorch_lightning
 scikit-learn
 scikit-multilearn
 torchtyping
+tensorboardx
+torch_scatter
+type_extensions

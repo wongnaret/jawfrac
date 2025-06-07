@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Literal, Tuple
+from typing import Any, Dict, List, Tuple
+from typing_extensions import Literal
 
 import numpy as np
 import pytorch_lightning as pl
