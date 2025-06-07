@@ -55,7 +55,7 @@ def train():
 
 
     trainer = pl.Trainer(
-        accelerator='gpu',
+        accelerator='cpu',
         devices=1,
         max_epochs=config['model']['epochs'],
         logger=logger,

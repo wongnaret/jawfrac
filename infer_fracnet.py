@@ -34,7 +34,7 @@ def infer(regex_filter: str=''):
     )
 
     trainer = pl.Trainer(
-        accelerator='gpu',
+        accelerator='cpu',
         devices=1,
         max_epochs=config['model']['epochs'],
     )

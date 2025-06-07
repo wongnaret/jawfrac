@@ -48,7 +48,7 @@ def infer_mandible(regex_filter: str='') -> TensorType[3, torch.int64]:
     )
 
     trainer = pl.Trainer(
-        accelerator='gpu',
+        accelerator='cpu',
         devices=1,
         max_epochs=config['model']['epochs'],
     )
@@ -110,7 +110,7 @@ def infer_fractures(uuid: str, shape: TensorType[3, torch.int64]):
     )
 
     trainer = pl.Trainer(
-        accelerator='gpu',
+        accelerator='cpu',
         devices=1,
         max_epochs=config['model']['epochs'],
     )
