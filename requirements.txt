@@ -7,10 +7,13 @@ pandas
 pydicom
 pylibjpeg[libjpeg,openjpeg,rle]
 PyWavelets
+torch
+torch_scatter
+torchmetrics==1.6.0
+torchtyping
 pytorch_lightning
+
 scikit-learn
 scikit-multilearn
-torchtyping
 tensorboardx
-torch_scatter
 type_extensions
