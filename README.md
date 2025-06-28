@@ -17,6 +17,83 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
 pip install -r requirements.txt
 ```
 
+## Dataset Preparation
+
+Of course. Here is the compiled guide in English.
+
+-----
+
+### Step 1: Install dcm2niix
+
+`dcm2niix` is a tool for converting medical images from DICOM to NIfTI format, which is a popular format for neuroimaging analysis.
+
+**How to Install (for macOS)**
+
+If you are using macOS and have Homebrew installed, you can easily install `dcm2niix` with a single command in your Terminal:
+
+```bash
+brew install dcm2niix
+```
+
+For other operating systems like Windows or Linux, you can download the program from [GitHub Releases](https://github.com/rordenlab/dcm2niix/releases) or install it via Conda:
+
+```bash
+conda install -c conda-forge dcm2niix
+```
+
+### Step 2: Segmentation with ITK-SNAP
+
+`ITK-SNAP` is a software application used for segmenting structures in 3D medical images. It is particularly useful for brain imaging analysis.
+
+**Main Tool:**
+
+  * **ITK-SNAP:** This is the primary tool we will use for segmentation. It provides several sub-tools to make the process easier, such as:
+      * **Paintbrush tool:** For manually painting regions of interest.
+      * **Polygon tool:** For drawing the boundaries of structures.
+      * **Automatic segmentation:** For automatically segmenting structures based on image properties.
+
+**Segmentation Steps:**
+
+1.  **Open NIfTI file:** Open the NIfTI file converted by `dcm2niix`.
+2.  **Select tool:** Choose the appropriate tool for the image and the structure you want to segment.
+3.  **Perform Segmentation:** Segment the image using the selected tool.
+4.  **Save the result:** Save the segmentation result as a NIfTI file.
+
+**ITK-SNAP Video Tutorials:**
+
+  * **[How to use: ITK Snap - YouTube](https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Dk2h39p4-3qA)**
+  * **[ITK-SNAP Tutorial: How to trace stroke lesions in T1w images - YouTube](https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3DO9t6aV2_3qY)**
+
+### Step 3: Organize Folder Structure and Rename Files
+
+This is the most crucial part. The `jawfrac` project expects a specific file and directory structure. For each patient, you must create a dedicated subfolder.
+
+Inside each patient's folder, there must be **only** these two files:
+
+  * **`scan.nii.gz`**: The 3D CT scan image file, converted from DICOM.
+  * **`label.nii.gz`**: The 3D segmentation mask file where the jawbone is labeled with the value `2`.
+
+**Example Directory Structure:**
+
+Assuming you have data for three patients (patient01, patient02, and patient03), the correct folder structure should be as follows:
+
+```
+training_dataset/
+├── patient01/
+│   ├── scan.nii.gz
+│   └── label.nii.gz
+│
+├── patient02/
+│   ├── scan.nii.gz
+│   └── label.nii.gz
+│
+└── patient03/
+    ├── scan.nii.gz
+    └── label.nii.gz
+```
+
+----
+
 ## Replicate
 
 When trying to replicate this work, the three stages should be trained separately.
@@ -37,7 +114,7 @@ Specify `work_dir`, `checkpoint_path`, and `root` in `jawfrac/config/fractures_l
 
 Again, specify `work_dir`, `checkpoint_path`, and `root` in `jawfrac/config/fractures_linear_displaced.yaml` and train the third stage using the mandible and fracture segmentations. This final model can be used for inference with `infer_fractures_linear_displaced.py`.
 
-
+----
 
 ## Cite
 
