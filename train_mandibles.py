@@ -8,13 +8,30 @@ from jawfrac.models import MandibleSegModule
 
 
 def train():
-    with open('jawfrac/config/mandibles.yaml', 'r') as f:
+    #with open('jawfrac/config/mandibles.yaml', 'r') as f:
+    with open('./config/mandibles.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
-    pl.seed_everything(config['seed'], workers=True)
+
+    pl.seed_everything(config['seed'])
 
     dm = MandibleSegDataModule(
-        seed=config['seed'], **config['datamodule'],
+        root=config['datamodule']['root'],
+        batch_size=config['datamodule']['batch_size'],
+        num_workers=config['datamodule']['num_workers'],
+        patch_size=config['datamodule']['patch_size'],
+        gamma_adjust=config['datamodule']['gamma_adjust'],
+        max_patches_per_scan=config['datamodule']['max_patches_per_scan'],
+        ignore_outside=config['datamodule']['ignore_outside'],
+        regular_spacing=config['datamodule']['regular_spacing'],
+        stride=config['datamodule']['stride'],
+        regex_filter=config['datamodule']['regex_filter'],
+        exclude=config['datamodule']['exclude'],  # Add this line
+        val_size=config['datamodule']['val_size'],
+        test_size=config['datamodule']['test_size'],
+        pin_memory=config['datamodule']['pin_memory'],
+        persistent_workers=config['datamodule']['persistent_workers'],
+        seed=config['seed'],
     )
 
     model = MandibleSegModule(

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 import torch
+import os
 from torchtyping import TensorType
 
 from jawfrac.data.datasets.mandibles import MandibleSegDataset
@@ -14,37 +15,44 @@ from jawfrac.datamodules.jawfrac import JawFracDataModule
 
 
 class MandibleSegDataModule(VolumeDataModule):
-
     def __init__(
         self,
-        root: Union[str, Path],
+        root: str,
+        batch_size: int,
+        num_workers: int,
         patch_size: int,
         gamma_adjust: bool,
         max_patches_per_scan: int,
         ignore_outside: bool,
-        **dm_cfg: Dict[str, Any],
+        regular_spacing: List[float],
+        stride: List[int],
+        regex_filter: str = '',
+        exclude: List[str] = [],
+        val_size: float = 0.2,
+        test_size: float = 0.1,
+        pin_memory: bool = True,
+        persistent_workers: bool = True,
+        seed: int = 42,
     ) -> None:
-        # use files functions from JawFrac when inferring for fracture data
-        if 'fractures' in str(root):  #  or str(root) == '/input':
-            self._files = partial(JawFracDataModule._files, self)
-            self._filter_files = partial(JawFracDataModule._filter_files, self)
-
         super().__init__(
-            exclude=[],
             root=root,
-            patch_size=patch_size,
-            **dm_cfg,
+            exclude=exclude,
+            regex_filter=regex_filter,  # Add this line
+            val_size=val_size,
+            test_size=test_size,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            persistent_workers=persistent_workers,
+            seed=seed,
         )
-
-        self.default_transforms = T.Compose(
-            T.IntensityAsFeatures(),
-            T.ToTensor(),
-        )
-
         self.patch_size = patch_size
         self.gamma_adjust = gamma_adjust
         self.max_patches_per_scan = max_patches_per_scan
         self.ignore_outside = ignore_outside
+        self.regular_spacing = regular_spacing
+        self.stride = stride
+        self.regex_filter = regex_filter
 
     def _filter_files(self, pattern: str) -> List[Path]:
         files = super()._filter_files(pattern)
@@ -74,7 +82,24 @@ class MandibleSegDataModule(VolumeDataModule):
 
         return list(zip(scan_files, seg_files))
 
-    def setup(self, stage: Optional[str]=None) -> None:
+    '''
+    def setup(self, stage: Optional[str] = None) -> None:
+        print(f"Setting up MandibleSegDataModule with root: {self.root}")
+        print(f"Files in root directory: {os.listdir(self.root)}")
+
+        self.train_dataset = MandibleSegDataset(
+            stage='fit',
+            root=self.root,
+            regex_filter=self.regex_filter,
+            regular_spacing=self.regular_spacing[0],
+            patch_size=self.patch_size,
+            stride=self.stride[0],
+            gamma_adjust=self.gamma_adjust,
+            max_patches_per_scan=self.max_patches_per_scan,
+            ignore_outside=self.ignore_outside,
+        )
+        print(f"Number of samples in train_dataset: {len(self.train_dataset)}")
+
         if stage is None or stage == 'fit':
             files = self._files('fit')
             train_files, val_files, _ = self._split(files)
@@ -138,7 +163,93 @@ class MandibleSegDataModule(VolumeDataModule):
                 transform=self.default_transforms,
                 **self.dataset_cfg,
             )
+    '''
+    def setup(self, stage: Optional[str] = None) -> None:
+        print(f"Setting up MandibleSegDataModule with root: {self.root}")
+        print(f"Files in root directory: {os.listdir(self.root)}")
 
+        files = self._files('fit')
+        train_files, val_files, _ = self._split(files)
+
+        rng = np.random.default_rng(self.seed)
+        val_transforms = T.Compose(
+            T.RelativePatchCoordinates(),
+            T.IntensityAsFeatures(),
+            T.PositiveNegativePatches(
+                max_patches=self.max_patches_per_scan,
+                ignore_outside=self.ignore_outside,
+                rng=rng,
+            ),
+            T.ToTensor(),
+        )
+        train_transforms = T.Compose(
+            T.RandomXAxisFlip(rng=rng),
+            T.RandomPatchTranslate(max_voxels=16, rng=rng),
+            val_transforms,
+            T.RandomGammaAdjust(rng=rng) if self.gamma_adjust else dict,
+        )
+
+        self.train_dataset = MandibleSegDataset(
+            stage='fit',
+            files=train_files,
+            root=self.root,
+            regex_filter=self.regex_filter,
+            regular_spacing=self.regular_spacing[0],
+            patch_size=self.patch_size,
+            stride=self.stride[0],
+            gamma_adjust=self.gamma_adjust,
+            max_patches_per_scan=self.max_patches_per_scan,
+            ignore_outside=self.ignore_outside,
+            transform=train_transforms,
+        )
+        print(f"Number of samples in train_dataset: {len(self.train_dataset)}")
+
+        if stage is None or stage == 'fit':
+            self.val_dataset = MandibleSegDataset(
+                stage='fit',
+                files=val_files,
+                root=self.root,
+                regex_filter=self.regex_filter,
+                regular_spacing=self.regular_spacing[0],
+                patch_size=self.patch_size,
+                stride=self.stride[0],
+                gamma_adjust=self.gamma_adjust,
+                max_patches_per_scan=self.max_patches_per_scan,
+                ignore_outside=self.ignore_outside,
+                transform=val_transforms,
+            )
+
+        if stage is None or stage == 'test':
+            test_files = self._files('test')
+            self.test_dataset = MandibleSegDataset(
+                stage='test',
+                files=test_files,
+                root=self.root,
+                regex_filter=self.regex_filter,
+                regular_spacing=self.regular_spacing[0],
+                patch_size=self.patch_size,
+                stride=self.stride[0],
+                gamma_adjust=self.gamma_adjust,
+                max_patches_per_scan=self.max_patches_per_scan,
+                ignore_outside=self.ignore_outside,
+                transform=self.default_transforms,
+            )
+
+        if stage is None or stage == 'predict':
+            predict_files = self._files('predict')
+            self.predict_dataset = MandibleSegDataset(
+                stage='predict',
+                files=predict_files,
+                root=self.root,
+                regex_filter=self.regex_filter,
+                regular_spacing=self.regular_spacing[0],
+                patch_size=self.patch_size,
+                stride=self.stride[0],
+                gamma_adjust=self.gamma_adjust,
+                max_patches_per_scan=self.max_patches_per_scan,
+                ignore_outside=self.ignore_outside,
+                transform=self.default_transforms,
+            )
     @property
     def num_channels(self) -> int:
         return 1

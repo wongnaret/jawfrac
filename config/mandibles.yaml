@@ -1,6 +1,6 @@
 # General configuration
 seed: 42
-work_dir: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace'  # Directory to save logs and model checkpoints
+work_dir: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace/'  # Directory to save logs and model checkpoints
 version: 'mandible_seg_run_01'     # A specific name for this training run
 accumulate_grad_batches: 2         # Number of batches to accumulate gradients over
 
@@ -12,12 +12,39 @@ datamodule:
   root: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace/training_set'
   batch_size: 2
   num_workers: 4
+  patch_size: 64  # Add this line (adjust the value as needed)
+  gamma_adjust: true  # Add this line
+  max_patches_per_scan: 1000  # Add this line (adjust the value as needed)
+  ignore_outside: true  # Add this line
+  regex_filter: ''  # Add this line (adjust if needed)
+  exclude: []  # Add this line
+  val_size: 0.2  # Add this line (adjust if needed)
+  test_size: 0.1  # Add this line (adjust if needed)
+  pin_memory: true  # Add this line
+  persistent_workers: true  # Add this line
+  regular_spacing: [1.0, 1.0, 1.0]  # Add this line (adjust values as needed)
+  stride: [32, 32, 32]  # Add this line (adjust values as needed)
   # Add other datamodule-specific parameters here if needed
-  # e.g., patch_size, num_samples, etc.
+  # e.g., num_samples, etc.
 
 # Model and training configuration
 model:
+  # MandibleNet specific parameters
+  num_awms: 4  # Add this line (adjust as needed)
+  channels_list: [32, 64, 128, 256]  # Add this line (adjust as needed)
+  backbone: 'conv'  # Add this line (options might be 'conv' or 'swin', adjust as needed)
+  head_kernel_size: 3  # Add this line (adjust as needed)
+  
+  # Other model parameters
   epochs: 200
-  learning_rate: 0.001
+  lr: 0.001  # This is likely the same as learning_rate, but include both to be safe
+  warmup_epochs: 10  # Add this line (adjust as needed)
+  weight_decay: 0.0001  # Add this line (adjust as needed)
+  focal_loss: true  # Add this line
+  dice_loss: true  # Add this line
+  x_axis_flip: true  # Add this line
+  conf_threshold: 0.5  # Add this line (adjust as needed)
+  min_component_size: 100  # Add this line (adjust as needed)
+  max_dist: 10.0  # Add this line (adjust as needed)
   # Add other model-specific hyperparameters here if needed
   # e.g., encoder_name, loss_function, etc.

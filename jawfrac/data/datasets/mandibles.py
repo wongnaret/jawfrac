@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
+import re
 
 import nibabel
 import numpy as np
@@ -9,20 +10,24 @@ from scipy import ndimage
 from jawfrac.data.datasets.base import VolumeDataset
 import jawfrac.data.transforms as T
 
-
 class MandibleSegDataset(VolumeDataset):
     """Dataset to load head scans with mandible segmentations."""
 
     def __init__(
         self,
         stage: str,
+        root: str,
+        regex_filter: str,
         regular_spacing: float,
         patch_size: int,
         stride: int,
+        gamma_adjust: bool,
+        max_patches_per_scan: int,
+        ignore_outside: bool,
         **kwargs: Dict[str, Any],
     ) -> None:
+        self.regex_filter = regex_filter
         pre_transform = T.Compose(
-            # T.NonNegativeCrop(),
             T.RegularSpacing(spacing=regular_spacing),
             T.NaturalHeadPositionOrient(),
             T.PatchIndices(patch_size=patch_size, stride=stride),
@@ -33,7 +38,21 @@ class MandibleSegDataset(VolumeDataset):
             ) if stage == 'fit' else ()),
         )
 
-        super().__init__(stage=stage, pre_transform=pre_transform, **kwargs)
+        super().__init__(
+            stage=stage,
+            root=root,
+            pre_transform=pre_transform,
+            **kwargs
+        )
+
+        print(f"Initializing MandibleSegDataset with root: {root}")
+        print(f"Number of files found: {len(self.files)}")
+
+    def _filter_files(self, files: List[Path]) -> List[Path]:
+        if self.regex_filter:
+            pattern = re.compile(self.regex_filter)
+            return [f for f in files if pattern.search(str(f))]
+        return files
 
     def load_inputs(
         self,

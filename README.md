@@ -33,6 +33,7 @@ If you are using macOS and have Homebrew installed, you can easily install `dcm2
 
 ```bash
 brew install dcm2niix
+brew install pigz          
 ```
 
 For other operating systems like Windows or Linux, you can download the program from [GitHub Releases](https://github.com/rordenlab/dcm2niix/releases) or install it via Conda:
