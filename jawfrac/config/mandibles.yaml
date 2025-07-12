@@ -1,5 +1,5 @@
-work_dir: '/mnt/d/nielsvannistelrooij/logs'
-work_dir: '/home/mkaailab/Documents/logs/condyles'
+#work_dir: '/mnt/d/nielsvannistelrooij/logs'
+work_dir: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace'
 version: 109
 seed: 0
 
@@ -27,7 +27,7 @@ datamodule:
   # root: '/home/mkaailab/Documents/condyles/nnUNet_raw/Dataset005_CondyleNotchCoronoidCrops'
   # root: '/home/mkaailab/Documents/condyles/nnUNet_raw/Dataset006_CondyleNotchCrops'
   # root: '/mnt/diag/condyles/Esbjerg/Crops'
-  root: '/home/mkaailab/Documents/condyles/test'
+  root: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace/training_set/'
   # root: '/input'
   regex_filter: ''
   val_size: 0.2

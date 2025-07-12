@@ -33,7 +33,13 @@ class MandibleSegDataset(VolumeDataset):
             ) if stage == 'fit' else ()),
         )
 
+        print('kwargs:', kwargs)
+
         super().__init__(stage=stage, pre_transform=pre_transform, **kwargs)
+
+
+        print(f"Initializing MandibleSegDataset with root: {kwargs['root']}")
+        print(f"Number of files found: {len(self.files)}")
 
     def load_inputs(
         self,

@@ -93,6 +93,15 @@ class JawFracDataModule(VolumeDataModule):
 
         frac_files = self._filter_files('**/label.nii.gz')
 
+        print("---------------------------------")
+        print("SCAN FILES:")
+        print(scan_files)
+        print("FRAC FILES:")
+        print(frac_files)
+        print("MANDIBLE FILES:")
+        print(mandible_files)
+        print("---------------------------------")
+
         return list(zip(scan_files, mandible_files, frac_files))
 
     def _split(

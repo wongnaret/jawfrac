@@ -32,6 +32,15 @@ class VolumeDataset(Dataset):
             disable=stage == 'predict',
         )
 
+        print(f'Created {self.__class__.__name__} dataset with {len(self.files)} samples.')
+        print(f"Initializing VolumeDataset with root: {self.root}")
+        print(f"Number of files found: {len(self.files)}")
+        print(f"Cache disabled: {self.cache.disable}")
+        print("List of files:")
+        for file in self.files:
+            print(file)
+
+
     def load_inputs(self, *files: Tuple[Path, ...]):
         raise NotImplementedError
 

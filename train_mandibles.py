@@ -16,6 +16,13 @@ def train():
     dm = MandibleSegDataModule(
         seed=config['seed'], **config['datamodule'],
     )
+    print("THIS IS THE TRAINING FUNCTION")
+    print(f"Initializing MandibleSegDataModule with root: {config['datamodule']['root']}")
+    #print(f"Number of files found: {len(dm.train_dataset.files)}")
+    #print(f"Cache disabled: {dm.train_dataset.cache.disable}")
+    #print("List of files:")
+    #for file in dm.train_dataset.files:
+    #    print(file)
 
     model = MandibleSegModule(
         num_classes=dm.num_classes,

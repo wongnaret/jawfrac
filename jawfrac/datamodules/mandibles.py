@@ -24,6 +24,11 @@ class MandibleSegDataModule(VolumeDataModule):
         ignore_outside: bool,
         **dm_cfg: Dict[str, Any],
     ) -> None:
+
+        print("THIS IS MANDIBLE SEG DATA MODULE")
+        print("kwargs:", dm_cfg)
+        print("root:", root)
+
         # use files functions from JawFrac when inferring for fracture data
         if 'fractures' in str(root):  #  or str(root) == '/input':
             self._files = partial(JawFracDataModule._files, self)
@@ -45,6 +50,9 @@ class MandibleSegDataModule(VolumeDataModule):
         self.gamma_adjust = gamma_adjust
         self.max_patches_per_scan = max_patches_per_scan
         self.ignore_outside = ignore_outside
+
+        #print("total number of files:", len(self.train_dataset.files))
+
 
     def _filter_files(self, pattern: str) -> List[Path]:
         files = super()._filter_files(pattern)
@@ -75,9 +83,16 @@ class MandibleSegDataModule(VolumeDataModule):
         return list(zip(scan_files, seg_files))
 
     def setup(self, stage: Optional[str]=None) -> None:
+
+        print("\nTHIS IS SETUP FUNCTION\n")
         if stage is None or stage == 'fit':
+            print("Training stage")
+
             files = self._files('fit')
             train_files, val_files, _ = self._split(files)
+
+            print(f"Number of train files: {len(train_files)}")
+            print(f"Number of files: {len(files)}")
 
             rng = np.random.default_rng(self.seed)
             val_transforms = T.Compose(
@@ -114,6 +129,9 @@ class MandibleSegDataModule(VolumeDataModule):
             files = self._files('test')
             _, test_files, _ = self._split(files)
 
+            print(f"Number of test files: {len(test_files)}")
+            print(f"Number of files: {len(files)}")
+
             self.test_dataset = MandibleSegDataset(
                 stage='test',
                 files=test_files[::-1],
@@ -123,6 +141,9 @@ class MandibleSegDataModule(VolumeDataModule):
 
         if stage is None or stage == 'predict':
             all_files = self._files('predict')
+
+            print(f"Number of all files: {len(all_files)}")
+
 
             non_mandible_files = []
             for files in all_files:
