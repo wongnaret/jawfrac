@@ -55,10 +55,21 @@ class MandibleSegDataModule(VolumeDataModule):
 
 
     def _filter_files(self, pattern: str) -> List[Path]:
+        #print("THIS IS _FILTER_FILES FUNCTION")
+        #print("Filtering files based on pattern: ", pattern)
+
         files = super()._filter_files(pattern)
-        
+
+        #print("total number of files after filtering:", len(files))
+        #print("list of files:")
+        for file in files:
+            print(file)
+
+
         overview_file = self.root / 'Fabian overview.csv'
         if not overview_file.exists():
+            #print("Overview file does not exist")
+            #print("Returning all files")
             return files
 
         df = pd.read_csv(overview_file)
@@ -74,11 +85,25 @@ class MandibleSegDataModule(VolumeDataModule):
     def _files(self, stage: str) -> List[Tuple[Path, ...]]:
         scan_files = self._filter_files('**/*.nii.gz')
 
+        print("\nSCAN FILES:")
+        print(scan_files)
+
         if stage == 'predict':
             return list(zip(scan_files))
 
         seg_files = self._filter_files('**/*_*.nii.gz')
-        seg_files = sorted(set(seg_files) - set(scan_files))
+
+        print("\nSEG FILES:")
+        print(seg_files)
+
+        #seg_files = sorted(set(seg_files) - set(scan_files))
+        scan_files = sorted(set(scan_files) - set(seg_files))
+
+        print("\nSCAN FILES (after filtering):")
+        print(scan_files)
+
+        print("\nZIPPED SCAN AND SEG FILES:")
+        print(list(zip(scan_files, seg_files)))
 
         return list(zip(scan_files, seg_files))
 
@@ -91,8 +116,10 @@ class MandibleSegDataModule(VolumeDataModule):
             files = self._files('fit')
             train_files, val_files, _ = self._split(files)
 
-            print(f"Number of train files: {len(train_files)}")
             print(f"Number of files: {len(files)}")
+
+            print(f"Number of train files: {len(train_files)}")
+            print(f"Number of val files: {len(val_files)}")
 
             rng = np.random.default_rng(self.seed)
             val_transforms = T.Compose(
