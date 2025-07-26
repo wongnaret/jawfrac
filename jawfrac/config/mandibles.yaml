@@ -1,13 +1,13 @@
 #work_dir: '/mnt/d/nielsvannistelrooij/logs'
-work_dir: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace'
+work_dir: '/Users/macos/Documents/Projects/Ai Projects/mandible/Data/name'
 version: 109
 seed: 0
 
 model:
   channels_list: [16, 32, 64, 128]
   lr: 0.005
-  epochs: 1000
-  warmup_epochs: 20
+  epochs: 10
+  warmup_epochs: 2
   weight_decay: 0.01
   backbone: 'conv'
   num_awms: 3
@@ -19,6 +19,7 @@ model:
   conf_threshold: 0.5
   x_axis_flip: True
   interpolation: 'slow'
+  
   # checkpoint_path: 'checkpoints/mandibles.ckpt'
 
 datamodule:
@@ -27,13 +28,12 @@ datamodule:
   # root: '/home/mkaailab/Documents/condyles/nnUNet_raw/Dataset005_CondyleNotchCoronoidCrops'
   # root: '/home/mkaailab/Documents/condyles/nnUNet_raw/Dataset006_CondyleNotchCrops'
   # root: '/mnt/diag/condyles/Esbjerg/Crops'
-  root: '/Users/wongnaret/beyond_workspace/max_prac/mandible_dataset/jawfrac_workspace/training_set/'
-  # root: '/input'
+  root: '/Users/macos/Documents/Projects/Ai Projects/mandible/Data/name'
   regex_filter: ''
   val_size: 0.2
   test_size: 0.0
-  batch_size: 16
-  num_workers: 0
+  batch_size: 2
+  num_workers: 10
   pin_memory: True
   persistent_workers: False
   regular_spacing: 0.4  # mm
@@ -42,5 +42,5 @@ datamodule:
   gamma_adjust: True
   max_patches_per_scan: 4
   ignore_outside: False
-
+  
 accumulate_grad_batches: 1
